@@ -4,8 +4,17 @@ import chalk from 'chalk';
 const app = express();
 const port = 3000;
 
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
+
+
+let userLoggedInRN = true; // Simulating user login status
+
 app.get('/', (req, res) => {
-    res.send('test');
+    res.render('index', {
+        version: '0.0.1',
+        userLoggedInRN
+    });
 })
 
 app.listen(port, () => {

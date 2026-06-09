@@ -1,0 +1,539 @@
+/*
+Styles copied from 'v-blogger' 
+https://github.com/Visheshbons/v-blogger/blob/master/public/styles.css
+*/
+
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    padding-bottom: 100px; /* Space for the footer */
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 10px 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+/* Center the navigation links */
+nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+nav ul li {
+    margin: 0 10px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+}
+
+nav ul li a:hover {
+    background: #555;
+    border-radius: 5px;
+}
+
+main {
+    padding: 20px;
+    background: #fff;
+    margin: 20px auto;
+    max-width: 1200px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+article {
+    padding: 20px;
+    background: #fff;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+}
+
+article .sent {
+    margin-left: 35%;
+}
+
+article .received {
+    margin-right: 35%;
+}
+
+h2 {
+    color: #333;
+    border-bottom: 2px solid #333;
+    padding-bottom: 5px;
+}
+
+a {
+    color: #333;
+    text-decoration: underline;
+}
+
+article {
+    margin-bottom: 20px;
+}
+
+article h3 {
+    color: #555;
+}
+
+footer {
+    text-align: center;
+    padding: 10px 0;
+    background: #333;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+footer a {
+    color: #fff;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Form styles */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="password"],
+form textarea {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+form input[type="submit"] {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+form input[type="submit"]:hover {
+    background: #555;
+}
+
+/* --- Image & media styling for posts --- */
+/* Ensure images embedded in markdown or placed in articles are responsive and styled */
+.markdown-content img,
+article img,
+.post-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 12px auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    object-fit: contain;
+}
+
+/* Optional figure/caption support */
+figure.post-figure {
+    margin: 12px 0;
+    text-align: center;
+}
+
+figure.post-figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+figure.post-figure figcaption {
+    font-size: 0.92em;
+    color: #666;
+    margin-top: 6px;
+    line-height: 1.3;
+}
+
+/* Simple gallery layout for multiple images inside a post */
+.post-gallery {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.post-gallery img {
+    flex: 1 1 200px;
+    max-width: 320px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Tweak for very small screens */
+@media (max-width: 480px) {
+    .post-gallery img {
+        flex-basis: 48%;
+    }
+    .markdown-content img,
+    article img,
+    .post-image {
+        margin: 10px 0;
+        border-radius: 6px;
+    }
+}
+
+/* Styles for the dropdown menu */
+.menu {
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu.show {
+    display: flex;
+}
+
+.menu li {
+    margin: 10px 0;
+}
+
+.menu li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px;
+    display: block;
+}
+
+.menu li a:hover {
+    background: #555;
+    border-radius: 5px;
+}
+
+/* Hamburger menu icon */
+.menu-icon {
+    display: none;
+    font-size: 1.5em;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .menu-icon {
+        display: block;
+    }
+
+    .menu {
+        display: none;
+        flex-direction: column;
+        background: #333;
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu.show {
+        display: flex;
+    }
+
+    nav ul {
+        display: none;
+    }
+}
+
+/* Hide the dropdown menu and show the horizontal menu on larger screens */
+@media (min-width: 769px) {
+    .menu {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    nav ul {
+        display: flex;
+    }
+}
+
+/* --- Likes & Comments Styling --- */
+
+/* Like button styles */
+.like-form {
+    display: inline-block;
+    margin: 8px 0;
+}
+
+.like-btn {
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #bbb;
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 1em;
+    cursor: pointer;
+    transition:
+        background 0.2s,
+        color 0.2s,
+        border 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.like-btn[data-liked="true"] {
+    background: rgb(151, 224, 163);
+    color: rgb(5, 122, 25);
+    border: 1.5px solid rgb(5, 122, 25);
+    font-weight: bold;
+}
+
+.like-btn:hover {
+    background: rgb(151, 224, 163);
+    color: rgb(5, 122, 25);
+    border-color: rgb(5, 122, 25);
+}
+
+/* Like count */
+.like-count {
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+/* Comments section */
+details {
+    margin-top: 10px;
+    text-align: left;
+}
+
+.comments-list {
+    margin: 10px 0 0 0;
+    padding: 0 0 0 10px;
+}
+
+.comment {
+    background: #f9f9f9;
+    border-left: 3px solid #bbb;
+    margin: 6px 0;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 0.98em;
+    word-break: break-word;
+}
+
+.comment strong {
+    color: #333;
+    font-weight: bold;
+}
+
+.comment small {
+    color: #888;
+    margin-left: 8px;
+    font-size: 0.93em;
+}
+
+/* Comment form */
+.comment-form {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.comment-form input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+    padding: 7px 10px;
+}
+
+.comment-form button[type="submit"] {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 7px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.comment-form button[type="submit"]:hover {
+    background: #555;
+}
+
+/* Details summary arrow styling */
+details summary {
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* Responsive tweaks for comments and likes */
+@media (max-width: 600px) {
+    article {
+        padding: 10px;
+        max-width: 98vw;
+    }
+    .comment-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* --- Blocker overlay (moved from inline and restyled to match site theme) ---
+   These rules intentionally use !important to ensure they take precedence over
+   any inline styles so the overlay matches the main stylesheet presentation.
+   Feel free to remove the !important flags after removing the inline <style>
+   block from the template.
+*/
+#blocked-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(34, 34, 34, 0.55) !important; /* subtle dark backdrop */
+    z-index: 9999 !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    backdrop-filter: blur(4px) !important;
+    padding: 20px !important;
+}
+
+/* Modal card */
+#blocked-overlay .blocked-modal {
+    background: #ffffff !important;
+    color: #222 !important;
+    padding: 20px 24px !important;
+    border-radius: 10px !important;
+    max-width: 520px !important;
+    width: 100% !important;
+    box-shadow: 0 8px 24px rgba(17, 17, 17, 0.18) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    text-align: center !important;
+    font-family: inherit !important;
+    transition:
+        transform 160ms ease,
+        opacity 160ms ease !important;
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+}
+
+/* Heading and text */
+#blocked-overlay .blocked-modal h3 {
+    margin: 0 0 8px 0 !important;
+    font-size: 1.15em !important;
+    color: #222 !important;
+    font-weight: 600 !important;
+}
+
+#blocked-overlay .blocked-modal p {
+    margin: 6px 0 !important;
+    color: #444 !important;
+    line-height: 1.4 !important;
+    font-size: 0.98em !important;
+}
+
+/* Emphasized count */
+#blocked-overlay .blocked-modal .anon-count {
+    font-weight: 700 !important;
+    color: #333 !important;
+}
+
+/* Login button — aligned with site's primary button styling */
+.blocked-login-btn {
+    display: inline-block !important;
+    padding: 10px 16px !important;
+    background: #333 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    border-radius: 8px !important;
+    margin-top: 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    box-shadow: 0 4px 12px rgba(51, 51, 51, 0.12) !important;
+    transition:
+        background 120ms ease,
+        transform 120ms ease !important;
+}
+
+.blocked-login-btn:hover {
+    background: #444 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Subtle secondary action for users that want to continue anonymously (optional) */
+#blocked-overlay .blocked-modal .blocked-secondary {
+    display: inline-block !important;
+    margin-left: 10px !important;
+    padding: 9px 14px !important;
+    background: transparent !important;
+    color: #333 !important;
+    border: 1px solid rgba(51, 51, 51, 0.08) !important;
+    border-radius: 8px !important;
+    text-decoration: none !important;
+    font-size: 0.95em !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    #blocked-overlay {
+        padding: 12px !important;
+    }
+    #blocked-overlay .blocked-modal {
+        padding: 16px !important;
+    }
+    .blocked-login-btn,
+    #blocked-overlay .blocked-modal .blocked-secondary {
+        width: 100% !important;
+        display: block !important;
+        margin-left: 0 !important;
+    }
+}
