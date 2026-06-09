@@ -1,0 +1,30 @@
+{
+  "name": "v-bank",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Visheshbons/v-bank.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Visheshbons/v-bank/issues"
+  },
+  "homepage": "https://github.com/Visheshbons/v-bank#readme",
+  "dependencies": {
+    "argon2": "^0.44.0",
+    "chalk": "^5.6.2",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  }
+}
