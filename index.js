@@ -20,7 +20,9 @@ app.get("/register", (req, res) => {
     version,
     userLoggedInRN,
   });
-});
+}).post("/register", (req, res) => {
+  // Check for SQL
+})
 
 app.get("/login", (req, res) => {
   res.render("login", {
