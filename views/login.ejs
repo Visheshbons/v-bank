@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles.css">
+    <title>Login | V-Blogger</title>
+</head>
+<body>
+    <%- include('header') %>
+    <main>
+        <h2>Login</h2>
+        <article>
+            <form action="/login" method="POST">
+                <div>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                    <input type="hidden" id="password_sha256" name="password_sha256">
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </article>
+        <article>
+            <p>Don't have an account? <a href="/register">Register here</a>.</p>
+        </article>
+    </main>
+    <%- include('footer') %>
+
+    <script>
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            return hashHex;
+        }
+
+        const form = document.querySelector('form[action="/login"]');
+        const passwordInput = document.getElementById('password');
+        const passwordHashInput = document.getElementById('password_sha256');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            passwordHashInput.value = await sha256(passwordInput.value);
+            passwordInput.value = '';
+
+            form.submit();
+        });
+    </script>
+</body>
+</html>
