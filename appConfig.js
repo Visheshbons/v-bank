@@ -64,23 +64,23 @@ function checkAuth(req, res, next) {
   const loggedIn = req.cookies.loggedIn;
   if (!loggedIn) {
     res.cookie("loggedIn", "false")
-    next();
+    return next();
   }
 
   const user = User.find("user", req.cookies?.username);
   if (!user) {
     res.cookie("loggedIn", "false")
-    next();
+    return next();
   }
 
   const token = req.cookies?.token;
   if (user.token === token) {
-    next();
+    return next();
   } else {
     res.cookie("loggedIn", "false")
     res.clearCookie("token");
     res.clearCookie("username");
-    next();
+    return next();
   }
 }
 
