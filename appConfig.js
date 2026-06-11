@@ -5,7 +5,7 @@ import { marked } from "marked";
 
 const app = express();
 const port = 3000;
-const version = "0.0.2";
+const version = "0.1.0";
 const DEV = true;
 
 // ==================== MIDDLEWARE ==================== \\
