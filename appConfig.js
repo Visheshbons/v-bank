@@ -122,8 +122,8 @@ class User {
   }
 }
 
-async function userLogin(id, username, password) {
-  const user = users.find((u) => u.id === id);
+async function userLogin(username, password) {
+  const user = users.find((u) => u.username === username);
   if (!user) {
     console.log(chalk.red("User not found"));
     return false;
@@ -145,4 +145,4 @@ async function userLogin(id, username, password) {
 }
 
 // ==================== EXPORTS ==================== \\
-export { app, port, version, User };
+export { app, port, version, User, checkForbiddenChars, hashPassword, verifyPassword, userLogin };
