@@ -5,7 +5,8 @@ import { marked } from "marked";
 
 const app = express();
 const port = 3000;
-const version = "0.0.1";
+const version = "0.0.2";
+const DEV = true;
 
 // ==================== MIDDLEWARE ==================== \\
 app.use(express.urlencoded({ extended: true })); // For parsing form data
@@ -56,6 +57,30 @@ function checkForbiddenChars(fields) {
   };
 }
 
+function checkAuth(req, res, next) {
+  const loggedIn = req.cookies.loggedIn;
+  if (!loggedIn) {
+    res.cookies("loggedIn", "false")
+    next();
+  }
+
+  const user = User.find("user", req.cookies?.username);
+  if (!user) {
+    res.cookies("loggedIn", "false")
+    next();
+  }
+
+  const token = req.cookies?.token;
+  if (user.token === token) {
+    next();
+  } else {
+    res.cookies("loggedIn", "false")
+    res.clearCookie("token");
+    res.clearCookie("username");
+    next();
+  }
+}
+
 // ==================== ARGON2 ==================== \\
 async function hashPassword(password) {
   try {
@@ -92,9 +117,11 @@ class User {
     this.id = this.#generateId();
     users.push(this);
 
-    this.loggedInRN = false;
+    this.loggedInRN = true; // account just created
 
     this.balance = 0;
+
+    this.token = ""; // user access token for auth
   }
 
   login() {
@@ -120,29 +147,59 @@ class User {
 
     return randomPart + indexPart + checksum.toString(16);
   }
+
+  // for index.js
+  static find(type, value) {
+    if (value === undefined || value === null || value === "") {
+      return null;
+    }
+    return users.find((u) => u[type] === value);
+  }
 }
 
 async function userLogin(username, password) {
-  const user = users.find((u) => u.username === username);
+  const user = users.find((u) => u.user === username);
   if (!user) {
     console.log(chalk.red("User not found"));
-    return false;
+    return 1; // handled in index.js
   }
 
-  if (user.user !== username) {
-    console.log(chalk.red("Invalid username"));
-    return false;
-  }
+  // if (user.user !== username) {
+  //   console.log(chalk.red("Invalid username"));
+  //   return false;
+  // }
 
   const isMatch = await verifyPassword(user.pass, password);
   if (!isMatch) {
     console.log(chalk.red("Invalid password"));
-    return false;
+    return 2; // handled again in index.js
   }
 
   user.login();
-  return true;
+  return 0; // success
+}
+
+
+
+// ==================== MISC ==================== \\
+function debug() {
+  if (!DEV) return;
+  console.log(chalk.yellow("\n========== DEBUG INFO START =========="));
+  console.log(chalk.yellow("User Array"))
+  console.log(users);
+  console.log(chalk.yellow("=========== DEBUG INFO END ===========\n"));
+}
+
+function token(username) {
+  const user = users.find((u) => u.user === username);
+  if (!user) {
+    console.log(chalk.red("User not found"));
+    return false;
+  }
+  // Random 32 char string
+  user.token = Math.random().toString(16).substring(2, 34);
+  return user.token;
 }
 
 // ==================== EXPORTS ==================== \\
-export { app, port, version, User, checkForbiddenChars, hashPassword, verifyPassword, userLogin };
+export { app, port, version, User, checkForbiddenChars, hashPassword, verifyPassword, userLogin, debug, token, checkAuth };

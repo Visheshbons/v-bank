@@ -40,6 +40,25 @@
             return hashHex;
         }
 
+        const loginErrors = {
+            '1': 'No account was found for that username.',
+            '2': 'The password you entered is incorrect.'
+        };
+
+        function showLoginErrorPopup() {
+            const errorCode = new URLSearchParams(window.location.hash.slice(1)).get('error');
+            const message = loginErrors[errorCode];
+
+            if (!message) {
+                return;
+            }
+
+            window.alert(message);
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+
+        showLoginErrorPopup();
+
         const form = document.querySelector('form[action="/login"]');
         const passwordInput = document.getElementById('password');
         const passwordHashInput = document.getElementById('password_sha256');
