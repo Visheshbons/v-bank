@@ -109,7 +109,7 @@ async function verifyPassword(hash, password) {
 let users = []; // <------------------------------------- MongoDB Implementation HERE
 
 class User {
-  constructor(username, pass) {
+  constructor(username, pass, balance = 0) {
     this.user = username;
     this.pass = pass;
 
@@ -122,7 +122,11 @@ class User {
 
     this.loggedInRN = true; // account just created
 
-    this.balance = 0;
+    this.balance = balance;
+    if (balance > 0) {
+      this.loggedInRN = false; // bc must be preset :D
+    }
+    this.transactions = [];
 
     this.token = ""; // user access token for auth
   }
@@ -158,6 +162,16 @@ class User {
     }
     return users.find((u) => u[type] === value);
   }
+
+  transfer(recipient_id, amount) {
+    let recipient = users.find((u) => u.id === recipient_id);
+    if (!recipient) {
+      // recipient not found
+      return;
+    }
+
+    new Transaction(this.id, recipient_id, amount);
+  }
 }
 
 async function userLogin(username, password) {
@@ -182,7 +196,46 @@ async function userLogin(username, password) {
   return 0; // success
 }
 
+// dont ask but i just had to use a class :D
+//   - Vishesh Kudva, 2026
+class Transaction {
+  constructor(senderId, recipientId, amount) {
+    // IDs MUST be validated beforehand
+    this.senderId = senderId;
+    this.recipientId = recipientId;
+    this.amount = amount;
+    this.timestamp = new Date();
 
+    this.#run();
+  }
+
+  #run() {
+    const sender = users.find((u) => u.id === this.senderId);
+    const recipient = users.find((u) => u.id === this.recipientId);
+
+    if (!sender || !recipient) {
+      // big oof
+      console.error(chalk.bgRed.yellow("[CRITICAL ERROR]:") + chalk.red(` Sender or recipient not found.`));
+      console.error(chalk.red("======= ERROR LOG START ======="));
+      console.error(chalk.red(`Sender ID: ${this.senderId}`));
+      console.error(chalk.red(`Recipient ID: ${this.recipientId}`));
+      console.error(chalk.red("======= ERROR LOG END ======="));
+      return false;
+    }
+
+    if (sender.balance < this.amount) {
+      return false;
+    }
+
+    sender.balance -= this.amount;
+    recipient.balance += this.amount;
+
+    sender.transactions.push(this);
+    recipient.transactions.push(this);
+
+    return true;
+  }
+}
 
 // ==================== MISC ==================== \\
 function debug() {

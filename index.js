@@ -9,11 +9,13 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 app.get("/", checkAuth, (req, res) => {
-  const userLoggedInRN = User.find("user", req.cookies?.username)?.loggedInRN || false;
-  
+  const currentUser = User.find("user", req.cookies?.username);
+  const userLoggedInRN = currentUser?.loggedInRN || false;
+
   res.render("index", {
     version,
     userLoggedInRN,
+    balance: currentUser?.balance || 0,
   });
 });
 
@@ -65,6 +67,8 @@ app.get("/logout", (req, res) => {
   res.cookie("loggedIn", "false")
   res.redirect("/");
 });
+
+new User('admin', '$argon2id$v=19$m=65536,t=3,p=4$ieRAQoJ+M6wJm86+/vTazA$s6SyLQ745tasC0vHRQDr1le/D8qB5efBTrMeyKMt5bY', Infinity);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${chalk.green(port)}`);

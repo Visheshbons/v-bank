@@ -20,6 +20,18 @@
                 <p><a href="/login">Login</a></p>
             <% } %>
         </section>
+
+        <% if (userLoggedInRN) { %>
+            <section>
+                <h2>Your Account</h2>
+                <% if (balance === Infinity) { %>
+                    <p>Balance: <i>"How did we get here?"</i></p>
+                <% } else { %>
+                    <p>Balance: $<%= balance || 0 %></p>
+                <% } %>
+                <p><a href="/account">View Account Details</a></p>
+            </section>
+        <% } %>
     </main>
 
     <%- include('footer') %>
