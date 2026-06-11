@@ -2,10 +2,13 @@ import express from "express";
 import chalk from "chalk";
 import argon2 from "argon2";
 import { marked } from "marked";
+import fs from "fs";
+
+const packageData = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+const version = packageData.version;
 
 const app = express();
 const port = 3000;
-const version = "0.1.0";
 const DEV = true;
 
 // ==================== MIDDLEWARE ==================== \\
@@ -60,13 +63,13 @@ function checkForbiddenChars(fields) {
 function checkAuth(req, res, next) {
   const loggedIn = req.cookies.loggedIn;
   if (!loggedIn) {
-    res.cookies("loggedIn", "false")
+    res.cookie("loggedIn", "false")
     next();
   }
 
   const user = User.find("user", req.cookies?.username);
   if (!user) {
-    res.cookies("loggedIn", "false")
+    res.cookie("loggedIn", "false")
     next();
   }
 
@@ -74,7 +77,7 @@ function checkAuth(req, res, next) {
   if (user.token === token) {
     next();
   } else {
-    res.cookies("loggedIn", "false")
+    res.cookie("loggedIn", "false")
     res.clearCookie("token");
     res.clearCookie("username");
     next();
