@@ -12,6 +12,10 @@ app.get("/", checkAuth, (req, res) => {
   const currentUser = User.find("user", req.cookies?.username);
   const userLoggedInRN = currentUser?.loggedInRN || false;
 
+  // const error = new Error("test");
+  // error.status = 500;
+  // throw error; // test error page
+
   res.render("index", {
     version,
     userLoggedInRN,
@@ -20,10 +24,10 @@ app.get("/", checkAuth, (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-    res.render("register", {
-      version
-    });
-  })
+  res.render("register", {
+    version
+  });
+})
   .post("/register", checkForbiddenChars(["username", "password_sha256"]), async (req, res) => {
     const { username, password_sha256 } = req.body;
     const hashedPassword = await hashPassword(password_sha256);
@@ -33,7 +37,7 @@ app.get("/register", (req, res) => {
     res.cookie("token", token(username), { maxAge: 9000000 })
     res.redirect("/");
     debug()
-  }); 
+  });
 
 app.get("/login", (req, res) => {
   res.render("login", {
@@ -80,7 +84,7 @@ app.get("/account", blockAuth, (req, res) => {
       id: userData.id,
       balance: userData.balance,
       transactions: userData.transactions
-    }
+    };
   } catch (e) {
     console.error("\n" + chalk.bgRed.yellow(`[CRITICAL ERROR]:`) + chalk.red(` Failed to retrieve user data for account page.`));
     console.error(chalk.red("======= ERROR LOG START =======\n"));
@@ -110,6 +114,42 @@ app.get("/account", blockAuth, (req, res) => {
 
     sender.transfer(recipient, amount);
     res.redirect("/account?success");
+  });
+
+
+
+
+
+// 404 
+app.use((req, res, next) => {
+  res.status(404).render("err", {
+    version,
+    err: {
+      code: 404
+    }
+  })
+  console.warn("\n" + chalk.bgYellow.black(`[WARNING]:`) + chalk.yellow(` 404 error - page not found. URL: ${req.url}, Method: ${req.method}`));
+});
+
+// 500(s)
+app.use((err, req, res, next) => {
+  console.error("\n" + chalk.bgRed.yellow(`[CRITICAL ERROR]:`) + chalk.red(` An unexpected error occurred.`));
+  console.error(chalk.red("======= ERROR LOG START =======\n"));
+  console.error(chalk.red(`\nError details:\n`));
+  console.error(chalk.red(err.stack || err));
+  console.error(chalk.red(`\n\nRequest details: `));
+  console.error(chalk.red(`\nURL: ${req.url}`));
+  console.error(chalk.red(`\nMethod: ${req.method}`));
+  console.error(chalk.red(`\nHeaders: ${JSON.stringify(req.headers, null, 2)}`));
+  console.error(chalk.red(`\nBody: ${JSON.stringify(req.body, null, 2)}`));
+  console.error(chalk.red("\n\n======== ERROR LOG END ========\n"));
+
+  res.status(err.status || 500).render("err", {
+    version,
+    err: {
+      code: err.status || 500
+    }
+  });
 });
 
 new User('admin', '$argon2id$v=19$m=65536,t=3,p=4$ieRAQoJ+M6wJm86+/vTazA$s6SyLQ745tasC0vHRQDr1le/D8qB5efBTrMeyKMt5bY', Infinity);
