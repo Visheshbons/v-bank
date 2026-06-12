@@ -46,7 +46,7 @@
         };
 
         function showLoginErrorPopup() {
-            const errorCode = new URLSearchParams(window.location.hash.slice(1)).get('error');
+            const errorCode = new URLSearchParams(window.location.search.slice(1)).get('error');
             const message = loginErrors[errorCode];
 
             if (!message) {

@@ -84,6 +84,31 @@ function checkAuth(req, res, next) {
   }
 }
 
+// checkAuth but better :D
+function blockAuth(req, res, next) {
+  const loggedIn = req.cookies.loggedIn;
+  if (!loggedIn) {
+    res.cookie("loggedIn", "false")
+    return res.redirect("/login");
+  }
+
+  const user = User.find("user", req.cookies?.username);
+  if (!user) {
+    res.cookie("loggedIn", "false")
+    return res.redirect("/login");
+  }
+
+  const token = req.cookies?.token;
+  if (user.token === token) {
+    return next();
+  } else {
+    res.cookie("loggedIn", "false")
+    res.clearCookie("token");
+    res.clearCookie("username");
+    return res.redirect("/login");
+  }
+}
+
 // ==================== ARGON2 ==================== \\
 async function hashPassword(password) {
   try {
@@ -215,11 +240,11 @@ class Transaction {
 
     if (!sender || !recipient) {
       // big oof
-      console.error(chalk.bgRed.yellow("[CRITICAL ERROR]:") + chalk.red(` Sender or recipient not found.`));
+      console.error("\n" + chalk.bgRed.yellow(`[CRITICAL ERROR]:`) + chalk.red(` Sender or recipient not found.`));
       console.error(chalk.red("======= ERROR LOG START ======="));
       console.error(chalk.red(`Sender ID: ${this.senderId}`));
       console.error(chalk.red(`Recipient ID: ${this.recipientId}`));
-      console.error(chalk.red("======= ERROR LOG END ======="));
+      console.error(chalk.red("======== ERROR LOG END ========\n"));
       return false;
     }
 
@@ -258,4 +283,4 @@ function token(username) {
 }
 
 // ==================== EXPORTS ==================== \\
-export { app, port, version, User, checkForbiddenChars, hashPassword, verifyPassword, userLogin, debug, token, checkAuth };
+export { app, port, version, User, checkForbiddenChars, hashPassword, verifyPassword, userLogin, debug, token, checkAuth, blockAuth };
