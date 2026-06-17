@@ -44,6 +44,9 @@ function checkForbiddenChars(fields) {
   return (req, res, next) => {
     for (const field of fields) {
       if (req.body[field] && forbiddenChars.test(req.body[field])) {
+        if (logging >= 4) {
+          console.warn(chalk.bgYellow.black("[WARNING]:") + chalk.yellow(` Input containing forbidden characters in field: ${field}. Value: ${logging >= 5 ? req.body[field] : chalk.grey("[SENSITIVE INFO]")}`));
+        }
         return res.status(400).send(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -76,19 +79,23 @@ function checkAuth(req, res, next) {
   const loggedIn = req.cookies.loggedIn;
   if (!loggedIn) {
     res.cookie("loggedIn", "false")
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` No loggedIn cookie present, fixing cookies to match state.`))
     return next();
   }
 
   const user = User.find("user", req.cookies?.username);
   if (!user) {
     res.cookie("loggedIn", "false")
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` No user found matching username cookie, fixing cookies to match state. Username cookie value: ${logging >= 5 ? req.cookies?.username : chalk.grey("[SENSITIVE INFO]")}`))
     return next();
   }
 
   const token = req.cookies?.token;
   if (user.token === token) {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` User authenticated successfully with token. Username: ${logging >= 5 ? user.user : chalk.grey("[SENSITIVE INFO]")}`))
     return next();
   } else {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Invalid token for user. Fixing cookies to match state. Username: ${logging >= 5 ? user.user : chalk.grey("[SENSITIVE INFO]")}, Token cookie value: ${logging >= 5 ? token : chalk.grey("[SENSITIVE INFO]")}`))
     res.cookie("loggedIn", "false")
     res.clearCookie("token");
     res.clearCookie("username");
@@ -100,20 +107,24 @@ function checkAuth(req, res, next) {
 function blockAuth(req, res, next) {
   const loggedIn = req.cookies.loggedIn;
   if (!loggedIn) {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` No loggedIn cookie present, redirecting to login. URL: ${req.originalUrl}`))
     res.cookie("loggedIn", "false")
     return res.redirect("/login");
   }
 
   const user = User.find("user", req.cookies?.username);
   if (!user) {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` No user found matching username cookie, redirecting to login. Username cookie value: ${logging >= 5 ? req.cookies?.username : chalk.grey("[SENSITIVE INFO]")}, URL: ${req.originalUrl}`))
     res.cookie("loggedIn", "false")
     return res.redirect("/login");
   }
 
   const token = req.cookies?.token;
   if (user.token === token) {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` User authenticated successfully with token, allowing access to protected route. Username: ${logging >= 5 ? user.user : chalk.grey("[SENSITIVE INFO]")}, URL: ${req.originalUrl}`))
     return next();
   } else {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Invalid token for user, redirecting to login. Username: ${logging >= 5 ? user.user : chalk.grey("[SENSITIVE INFO]")}, Token cookie value: ${logging >= 5 ? token : chalk.grey("[SENSITIVE INFO]")}, URL: ${req.originalUrl}`))
     res.cookie("loggedIn", "false")
     res.clearCookie("token");
     res.clearCookie("username");
@@ -124,7 +135,10 @@ function blockAuth(req, res, next) {
 // ==================== ARGON2 ==================== \\
 async function hashPassword(password) {
   try {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Hashing password.`))
+    logging >= 5 && console.time("Password hashed in");
     const hash = await argon2.hash(password);
+    logging >= 5 && console.timeEnd("Password hashed in");
     return hash;
   } catch (err) {
     // logging >= 2 && console.error("Error hashing password:", err);
@@ -141,7 +155,10 @@ async function hashPassword(password) {
 
 async function verifyPassword(hash, password) {
   try {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Verifying password.`));
+    logging >= 5 && console.time("Password verified in");
     const isValid = await argon2.verify(hash, password);
+    logging >= 5 && console.timeEnd("Password verified in");
     return isValid;
   } catch (err) {
     if (logging >= 2) {
@@ -202,25 +219,34 @@ class User {
         parseInt(indexPart, 16)) %
       16;
 
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Generated user ID: ${randomPart + indexPart + checksum.toString(16)}`))
     return randomPart + indexPart + checksum.toString(16);
   }
 
   // for index.js
   static find(type, value) {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Searching for user with ${type}: ${logging >= 5 ? value : chalk.grey("[SENSITIVE INFO]")}`))
     if (value === undefined || value === null || value === "") {
       return null;
     }
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Users found.`))
     return users.find((u) => u[type] === value);
   }
 
   transfer(recipient_id, amount) {
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Initiating transfer from user ID ${logging >= 5 ? this.id : chalk.grey("[SENSITIVE INFO]")} to recipient ID ${logging >= 5 ? recipient_id : chalk.grey("[SENSITIVE INFO]")} for amount ${logging >= 5 ? amount : chalk.grey("[SENSITIVE INFO]")}`))
+    logging >= 5 && console.time("Transfer completed in");
     let recipient = users.find((u) => u.id === recipient_id);
     if (!recipient) {
       // recipient not found
+      logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Recipient not found for transfer. Recipient ID: ${logging >= 5 ? recipient_id : chalk.grey("[SENSITIVE INFO]")}`))
+      logging >= 5 && console.timeEnd("Transfer completed in");
       return;
     }
 
     new Transaction(this.id, recipient_id, amount);
+    logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Transfer complete. Sender balance: ${logging >= 5 ? this.balance : chalk.grey("[SENSITIVE INFO]")}, Recipient balance: ${logging >= 5 ? recipient.balance : chalk.grey("[SENSITIVE INFO]")}`))
+    logging >= 5 && console.timeEnd("Transfer completed in");
   }
 }
 
@@ -248,6 +274,7 @@ async function userLogin(username, password) {
   }
 
   user.login();
+  logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` User logged in successfully. Username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`))
   return 0; // success
 }
 
@@ -320,17 +347,20 @@ function debug() {
 }
 
 function token(username) {
+  logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` Generating token for username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`));
+  logging >= 5 && console.time("Token generated in");
   const user = users.find((u) => u.user === username);
   if (!user) {
-    if (logging >= 2) {
-      console.warn(chalk.bgYellow.black("[WARNING]:") + chalk.yellow(` User not found during token generation for username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`));
-    }
+    logging >= 2 &&console.warn(chalk.bgYellow.black("[WARNING]:") + chalk.yellow(` User not found during token generation for username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`));
+    logging >= 5 && console.timeEnd("Token generated in");
     return false;
   }
   // Random 32 char string
   user.token = Math.random().toString(16).substring(2, 34);
+  logging >= 5 && console.timeEnd("Token generated in");
   return user.token;
 }
 
 // ==================== EXPORTS ==================== \\
 export { app, port, version, User, checkForbiddenChars, hashPassword, verifyPassword, userLogin, debug, token, checkAuth, blockAuth };
+logging >= 5 && console.log(chalk.blue("[INFO]:") + chalk.grey(` app.Config fully loaded. Version: ${version}`))
