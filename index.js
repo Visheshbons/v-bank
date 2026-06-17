@@ -1,3 +1,5 @@
+console.time("Loading time");
+
 // logs are:
 // 0 - no logs
 // 1 - critical errors only
@@ -5,15 +7,18 @@
 // 3 - most debug logs (default)
 // 4 - all logs that do not contain sensitive info
 // 5 - everything
-let logging = process.env.LOGS || 3;
+import dotenv from "dotenv";
+dotenv.config();
+const logging = Number.parseInt(process.env.LOGS ?? "3", 10) || 3
 
-logging >= 1 && console.time("Loading time");
+logging >= 1 && console.timeLog("Loading time", "- environment variables loaded");
 
 import express from "express";
 import chalk from "chalk";
 import cookieParser from "cookie-parser";
 
-export { logging }; // for appConfig.js
+// .env file exists :D
+// export { logging }; // for appConfig.js
 
 import { app, port, version, checkForbiddenChars, hashPassword, verifyPassword, userLogin, User, debug, token, checkAuth, blockAuth } from "./appConfig.js";
 logging >= 3 && console.timeLog("Loading time", "- appConfig.js loaded");
@@ -174,8 +179,12 @@ logging >= 3 && console.timeLog("Loading time", "- setup complete, starting serv
 app.listen(port, () => {
   if (logging >= 2) {
     console.timeEnd("Loading time");
+    console.log(`Server will log at level ${chalk.green(logging)} or higher.`);
     console.log(`Server is running on port ${chalk.green(port)}`);
     console.log(`App version: ${chalk.blue(version)}`);
-  };
+  } else {
+    console.timeEnd("Loading time");
+    console.log(`V-Bank is live!`);
+  }
   logging >= 3 && debug();
 });

@@ -3,7 +3,7 @@ import chalk from "chalk";
 import argon2 from "argon2";
 import { marked } from "marked";
 import fs from "fs";
-import { logging } from "./index.js";
+// import { logging } from "./index.js";
 
 const packageData = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 const version = packageData.version;
@@ -19,8 +19,9 @@ const DEV = true;
 // 3 - most debug logs (default)
 // 4 - all logs that do not contain sensitive info
 // 5 - everything
-// let logging = process.env.LOGS || 3;
-// moved to start of index.js
+import dotenv from "dotenv";
+dotenv.config();
+const logging = Number.parseInt(process.env.LOGS ?? "3", 10) || 3
 
 // ==================== MIDDLEWARE ==================== \\
 app.use(express.urlencoded({ extended: true })); // For parsing form data
@@ -299,7 +300,7 @@ function debug() {
   if (!DEV) return;
   console.log(chalk.yellow("\n========== DEBUG INFO START =========="));
   console.log(chalk.yellow("User Array"))
-  if (logging <= 5) {
+  if (logging < 5) {
     // cannot show id, balance, token, or username
     // can show transactions but need to clean
     console.log(users.map(u => ({
