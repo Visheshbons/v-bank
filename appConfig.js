@@ -3,6 +3,7 @@ import chalk from "chalk";
 import argon2 from "argon2";
 import { marked } from "marked";
 import fs from "fs";
+import { logging } from "./index.js";
 
 const packageData = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 const version = packageData.version;
@@ -10,6 +11,16 @@ const version = packageData.version;
 const app = express();
 const port = 3000;
 const DEV = true;
+
+// logs are:
+// 0 - no logs
+// 1 - critical errors only
+// 2 - errors and startup logs only
+// 3 - most debug logs (default)
+// 4 - all logs that do not contain sensitive info
+// 5 - everything
+// let logging = process.env.LOGS || 3;
+// moved to start of index.js
 
 // ==================== MIDDLEWARE ==================== \\
 app.use(express.urlencoded({ extended: true })); // For parsing form data
@@ -115,7 +126,14 @@ async function hashPassword(password) {
     const hash = await argon2.hash(password);
     return hash;
   } catch (err) {
-    console.error("Error hashing password:", err);
+    // logging >= 2 && console.error("Error hashing password:", err);
+    if (logging >= 2) {
+      console.error(chalk.red("======= ERROR LOG START ======="));
+      console.error(chalk.red(`This error was thrown ${err.stack.split("\n")[1].trim()} in appConfig.js.`));
+      console.error(chalk.red("Error hashing password:"));
+      console.error(chalk.red(err));
+      console.error(chalk.red("======== ERROR LOG END ========\n"));
+    }
     throw err;
   }
 }
@@ -125,7 +143,13 @@ async function verifyPassword(hash, password) {
     const isValid = await argon2.verify(hash, password);
     return isValid;
   } catch (err) {
-    console.error("Error verifying password:", err);
+    if (logging >= 2) {
+      console.error(chalk.red("======= ERROR LOG START ======="));
+      console.error(chalk.red(`This error was thrown ${err.stack.split("\n")[1].trim()} in appConfig.js.`));
+      console.error(chalk.red("Error verifying password:"));
+      console.error(chalk.red(err));
+      console.error(chalk.red("======== ERROR LOG END ========\n"));
+    }
     throw err;
   }
 }
@@ -202,7 +226,10 @@ class User {
 async function userLogin(username, password) {
   const user = users.find((u) => u.user === username);
   if (!user) {
-    console.log(chalk.red("User not found"));
+    // logging >= 2 && console.log(chalk.red("User not found"));
+    if (logging >= 2) {
+      console.warn(chalk.bgYellow.black("[WARNING]:") + chalk.yellow(` User not found during login attempt for username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`));
+    }
     return 1; // handled in index.js
   }
 
@@ -213,7 +240,9 @@ async function userLogin(username, password) {
 
   const isMatch = await verifyPassword(user.pass, password);
   if (!isMatch) {
-    console.log(chalk.red("Invalid password"));
+    if (logging >= 2) {
+      console.warn(chalk.bgYellow.black("[WARNING]:") + chalk.yellow(` Invalid password for username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`));
+    }
     return 2; // handled again in index.js
   }
 
@@ -240,11 +269,14 @@ class Transaction {
 
     if (!sender || !recipient) {
       // big oof
-      console.error("\n" + chalk.bgRed.yellow(`[CRITICAL ERROR]:`) + chalk.red(` Sender or recipient not found.`));
-      console.error(chalk.red("======= ERROR LOG START ======="));
-      console.error(chalk.red(`Sender ID: ${this.senderId}`));
-      console.error(chalk.red(`Recipient ID: ${this.recipientId}`));
-      console.error(chalk.red("======== ERROR LOG END ========\n"));
+      if (logging >= 1) {
+        console.error("\n" + chalk.bgRed.yellow(`[CRITICAL ERROR]:`) + chalk.red(` Sender or recipient not found.`));
+        console.error(chalk.red("======= ERROR LOG START ======="));
+        console.error(chalk.red(`This error was thrown ${new Error().stack.split("\n")[2].trim()} in appConfig.js.`));
+        console.error(chalk.red(`Sender ID: ${logging >= 5 ? this.senderId : chalk.grey("[SENSITIVE INFO]")}`));
+        console.error(chalk.red(`Recipient ID: ${logging >= 5 ? this.recipientId : chalk.grey("[SENSITIVE INFO]")}`));
+        console.error(chalk.red("======== ERROR LOG END ========\n"));
+      }
       return false;
     }
 
@@ -267,14 +299,31 @@ function debug() {
   if (!DEV) return;
   console.log(chalk.yellow("\n========== DEBUG INFO START =========="));
   console.log(chalk.yellow("User Array"))
-  console.log(users);
+  if (logging <= 5) {
+    // cannot show id, balance, token, or username
+    // can show transactions but need to clean
+    console.log(users.map(u => ({
+      pass: u.pass,
+      loggedInRN: u.loggedInRN,
+      transactions: u.transactions.map(t => ({
+        senderId: "hidden",
+        recipientId: "hidden",
+        amount: t.amount,
+        timestamp: t.timestamp
+      }))
+    })));
+  } else {
+    console.log(users);
+  }
   console.log(chalk.yellow("=========== DEBUG INFO END ===========\n"));
 }
 
 function token(username) {
   const user = users.find((u) => u.user === username);
   if (!user) {
-    console.log(chalk.red("User not found"));
+    if (logging >= 2) {
+      console.warn(chalk.bgYellow.black("[WARNING]:") + chalk.yellow(` User not found during token generation for username: ${logging >= 5 ? username : chalk.grey("[SENSITIVE INFO]")}`));
+    }
     return false;
   }
   // Random 32 char string
